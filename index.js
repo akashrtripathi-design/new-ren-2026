@@ -1,16 +1,20 @@
 const express = require("express");
 const { fabric } = require("fabric");
-const skia = require("skia-canvas");
+const { createCanvas, Image } = require("canvas");
 
 global.document = {
   createElement: function (tag) {
     if (tag === "canvas") {
-      const canvas = new skia.Canvas(800, 600);
-      canvas.style = {};
+      const canvas = createCanvas(800, 600);
       return canvas;
     }
     return {};
   }
+};
+
+global.window = {
+  devicePixelRatio: 1,
+  Image: Image
 };
 
 global.window = {
@@ -45,7 +49,7 @@ async function renderTemplate(template) {
   await hydrateLayers(canvas, template.layers, assetMap);
 
   const skiaCanvas = canvas.lowerCanvasEl;
-  return await skiaCanvas.toBuffer("png");
+  return canvas.lowerCanvasEl.toBuffer("image/png");
 }
 
 app.post("/render", async (req, res) => {
