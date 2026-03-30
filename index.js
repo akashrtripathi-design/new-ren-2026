@@ -2,16 +2,15 @@ const express = require("express");
 const { fabric } = require("fabric");
 const { createCanvas, Image } = require("canvas");
 
+// Mock DOM for Fabric
 global.document = {
   createElement: function (tag) {
     if (tag === "canvas") {
-      const canvas = createCanvas(800, 600);
-      return canvas;
+      return createCanvas(800, 600);
     }
     return {};
   }
 };
-const { createCanvas, Image } = require("canvas");
 
 global.window = {
   devicePixelRatio: 1,
@@ -27,10 +26,12 @@ const { hydrateLayers } = require("./hydration");
 const app = express();
 app.use(express.json({ limit: "20mb" }));
 
+// Test route
 app.get("/", (req, res) => {
   res.send("Render Engine Running 🚀");
 });
 
+// Render function
 async function renderTemplate(template) {
   const width = template.canvas.width;
   const height = template.canvas.height;
@@ -44,10 +45,11 @@ async function renderTemplate(template) {
   const assetMap = await loadAssets(template);
   await hydrateLayers(canvas, template.layers, assetMap);
 
-  const skiaCanvas = canvas.lowerCanvasEl;
+  // Final output
   return canvas.lowerCanvasEl.toBuffer("image/png");
 }
 
+// API
 app.post("/render", async (req, res) => {
   try {
     const buffer = await renderTemplate(req.body);
