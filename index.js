@@ -49,6 +49,27 @@ async function renderTemplate(template) {
     backgroundColor: template.canvas.backgroundColor || "#ffffff"
   });
 
+  // 🔥 DEBUG: force text add
+  const text = new fabric.Text("Hello Akash 🚀", {
+    left: 100,
+    top: 200,
+    fontSize: 40,
+    fill: "#000"
+  });
+
+  canvas.add(text);
+
+  return canvas.lowerCanvasEl.toBuffer("image/png");
+} {
+  const width = template.canvas.width;
+  const height = template.canvas.height;
+
+  const canvas = new fabric.StaticCanvas(null, {
+    width,
+    height,
+    backgroundColor: template.canvas.backgroundColor || "#ffffff"
+  });
+
   const assetMap = await loadAssets(template);
   await hydrateLayers(canvas, template.layers, assetMap);
 
