@@ -11,15 +11,11 @@ global.document = {
     return {};
   }
 };
+const { createCanvas, Image } = require("canvas");
 
 global.window = {
   devicePixelRatio: 1,
   Image: Image
-};
-
-global.window = {
-  devicePixelRatio: 1,
-  Image: skia.Image
 };
 
 fabric.document = global.document;
