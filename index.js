@@ -14,7 +14,9 @@ global.document = {
 
 global.window = {
   devicePixelRatio: 1,
-  Image: Image
+  Image: Image,
+  setTimeout: setTimeout,
+  clearTimeout: clearTimeout
 };
 
 fabric.document = global.document;
