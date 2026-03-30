@@ -1,8 +1,9 @@
 const express = require("express");
+const cors = require("cors");
 const { fabric } = require("fabric");
 const { createCanvas, Image } = require("canvas");
 
-// Mock DOM for Fabric
+// 🔥 Fix Fabric for Node environment
 global.document = {
   createElement: function (tag) {
     if (tag === "canvas") {
@@ -22,18 +23,22 @@ global.window = {
 fabric.document = global.document;
 fabric.window = global.window;
 
+// 🔥 Import helpers
 const { loadAssets } = require("./assetLoader");
 const { hydrateLayers } = require("./hydration");
 
+// 🔥 Express setup
 const app = express();
+
+app.use(cors()); // ✅ CORS FIX
 app.use(express.json({ limit: "20mb" }));
 
-// Test route
+// ✅ Test route
 app.get("/", (req, res) => {
   res.send("Render Engine Running 🚀");
 });
 
-// Render function
+// 🔥 Render function
 async function renderTemplate(template) {
   const width = template.canvas.width;
   const height = template.canvas.height;
@@ -41,17 +46,16 @@ async function renderTemplate(template) {
   const canvas = new fabric.StaticCanvas(null, {
     width,
     height,
-    backgroundColor: template.canvas.backgroundColor || "#fff"
+    backgroundColor: template.canvas.backgroundColor || "#ffffff"
   });
 
   const assetMap = await loadAssets(template);
   await hydrateLayers(canvas, template.layers, assetMap);
 
-  // Final output
   return canvas.lowerCanvasEl.toBuffer("image/png");
 }
 
-// API
+// ✅ API route
 app.post("/render", async (req, res) => {
   try {
     const buffer = await renderTemplate(req.body);
@@ -63,6 +67,7 @@ app.post("/render", async (req, res) => {
   }
 });
 
+// 🔥 Start server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
