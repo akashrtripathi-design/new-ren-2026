@@ -25,12 +25,12 @@ fabric.document = global.document;
 fabric.window = global.window;
 
 // ------------------
-// EXPRESS SETUP
+// EXPRESS
 // ------------------
 const app = express();
 app.use(express.json({ limit: "20mb" }));
 
-// 🔥 CORS FIX (IMPORTANT)
+// ✅ CORS FIX
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
@@ -45,40 +45,34 @@ app.get("/", (req, res) => {
 });
 
 // ------------------
-// RENDER FUNCTION
-// ------------------
-async function renderTemplate(template) {
-  const width = template.canvas?.width || 800;
-  const height = template.canvas?.height || 500;
-
-  const canvas = new fabric.StaticCanvas(null, {
-    width,
-    height,
-    backgroundColor: template.canvas?.backgroundColor || "#ffffff"
-  });
-
-  // 🔥 DEBUG TEXT (always show)
-  const text = new fabric.Text("Hello Akash 🚀", {
-    left: 100,
-    top: 200,
-    fontSize: 40,
-    fill: "#000"
-  });
-
-  canvas.add(text);
-
-  return canvas.lowerCanvasEl.toBuffer("image/png");
-}
-
-// ------------------
-// API ROUTE
+// 🔥 IMPORTANT FIX HERE
 // ------------------
 app.post("/render", async (req, res) => {
   try {
-    const buffer = await renderTemplate(req.body);
+    const canvas = new fabric.StaticCanvas(null, {
+      width: 800,
+      height: 500,
+      backgroundColor: "#ffffff"
+    });
+
+    // 🔥 FORCE DRAW (THIS WAS MISSING)
+    const text = new fabric.Text("Hello Akash 🚀", {
+      left: 100,
+      top: 200,
+      fontSize: 40,
+      fill: "#000"
+    });
+
+    canvas.add(text);
+
+    // 🔥 CRITICAL
+    canvas.renderAll();
+
+    const buffer = canvas.lowerCanvasEl.toBuffer("image/png");
 
     res.setHeader("Content-Type", "image/png");
     res.send(buffer);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -86,10 +80,8 @@ app.post("/render", async (req, res) => {
 });
 
 // ------------------
-// SERVER START
-// ------------------
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("Server running on " + PORT);
 });
