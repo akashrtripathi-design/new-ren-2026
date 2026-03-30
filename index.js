@@ -3,14 +3,24 @@ const { fabric } = require("fabric");
 const { createCanvas, Image } = require("canvas");
 
 // ------------------
-// FIX: Fabric Node setup
+// FIX: Fake DOM for Fabric
 // ------------------
 global.document = {
   createElement: function (tag) {
     if (tag === "canvas") {
-      return createCanvas(800, 600);
+      const canvas = createCanvas(800, 600);
+
+      // 🔥 Fabric compatibility fixes
+      canvas.style = {};
+      canvas.classList = { add: () => {}, remove: () => {} };
+
+      canvas.getAttribute = () => null;
+      canvas.setAttribute = () => {};
+      canvas.removeAttribute = () => {};
+
+      return canvas;
     }
-    return {};
+    return { style: {} };
   }
 };
 
@@ -18,7 +28,8 @@ global.window = {
   devicePixelRatio: 1,
   Image: Image,
   setTimeout: setTimeout,
-  clearTimeout: clearTimeout
+  clearTimeout: clearTimeout,
+  document: global.document
 };
 
 fabric.document = global.document;
@@ -45,7 +56,7 @@ app.get("/", (req, res) => {
 });
 
 // ------------------
-// 🔥 IMPORTANT FIX HERE
+// RENDER API
 // ------------------
 app.post("/render", async (req, res) => {
   try {
@@ -55,7 +66,7 @@ app.post("/render", async (req, res) => {
       backgroundColor: "#ffffff"
     });
 
-    // 🔥 FORCE DRAW (THIS WAS MISSING)
+    // 🔥 FORCE TEXT (for testing)
     const text = new fabric.Text("Hello Akash 🚀", {
       left: 100,
       top: 200,
@@ -65,7 +76,7 @@ app.post("/render", async (req, res) => {
 
     canvas.add(text);
 
-    // 🔥 CRITICAL
+    // 🔥 IMPORTANT
     canvas.renderAll();
 
     const buffer = canvas.lowerCanvasEl.toBuffer("image/png");
